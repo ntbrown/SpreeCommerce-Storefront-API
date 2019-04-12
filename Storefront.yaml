@@ -1,0 +1,5362 @@
+---
+swagger: '2.0'
+info:
+  version: "1.0.1"
+  title: SpreeCommerce StoreFront API
+  description: Implementation of the StoreFront API from SpreeCommerce
+  contact:
+    email: overflow2341313@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+host: www.naturalwellbeing.com
+basePath: "/api/v1"
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  "/countries":
+    get:
+      operationId: getCountries
+      parameters:
+      - name: q
+        in: query
+        type: string
+      - name: page
+        in: query
+        type: integer
+        minimum: 0
+        description: The page number of products to display.
+      - name: per_page
+        in: query
+        type: integer
+        minimum: 0
+        description: The number of products to return per page
+      responses:
+        '200':
+          description: A list of countries has been fetched
+          schema:
+            "$ref": "#/definitions/CountryListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/countries/{id}":
+    get:
+      operationId: getCountryById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: The Country has been retrieved
+          schema:
+            "$ref": "#/definitions/Country"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/checkouts/{number}/next.json":
+    put:
+      operationId: transitionOrderToNextStep
+      parameters:
+      - name: number
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: The order has been updated
+          schema:
+            "$ref": "#/definitions/Order"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/checkouts/{number}.json":
+    put:
+      operationId: transitionOrderToDelivery
+      parameters:
+      - name: number
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: The order has been updated
+          schema:
+            "$ref": "#/definitions/Order"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products":
+    get:
+      operationId: getProducts
+      parameters:
+      - name: q
+        in: query
+        type: string
+        description: 'Query to search for a particular product. ?q[name_cont]=Spreehe
+          name_cont here is called a predicate, and you can learn more about them
+          by reading about Predicates on the Ransack wiki.. '
+      - name: show_deleted
+        in: query
+        type: boolean
+        description: 'true to show deleted products. false to hide them. Default:
+          false. Only available to users with an admin role.'
+      - name: show_discontinued
+        in: query
+        type: boolean
+        description: 'boolean - true to show discontinued products, false to hide
+          them. Default: false. Only available to users with an admin role.'
+      - name: ids
+        in: query
+        type: string
+        description: A comma-separated list of products ids. Specifying this parameter
+          will display the respective products.
+      - name: page
+        in: query
+        type: integer
+        minimum: 0
+        description: The page number of products to display.
+      - name: per_page
+        in: query
+        type: integer
+        minimum: 0
+        description: The number of products to return per page
+      responses:
+        '200':
+          description: A list of products has been fetched
+          schema:
+            "$ref": "#/definitions/GetAllProductsResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createProduct
+      parameters:
+      - name: product
+        in: body
+        schema:
+          "$ref": "#/definitions/NewProduct"
+      responses:
+        '201':
+          description: A Product has been created.
+          schema:
+            "$ref": "#/definitions/GetProductByIdProduct"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products/{string}":
+    get:
+      operationId: getProductByPermalink
+      parameters:
+      - name: string
+        in: path
+        type: string
+        required: true
+        description: A permalink to the product.
+      responses:
+        '200':
+          description: The Product has been fetched.
+          schema:
+            "$ref": "#/definitions/GetProductByIdProduct"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateProductByPermalink
+      parameters:
+      - name: string
+        in: path
+        required: true
+        type: string
+      - name: product
+        in: body
+        schema:
+          "$ref": "#/definitions/NewProduct"
+        required: true
+      responses:
+        '201':
+          description: The product has been updated.
+          schema:
+            "$ref": "#/definitions/GetProductByIdProduct"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteProductByPermalink
+      parameters:
+      - name: string
+        in: path
+        type: string
+        required: true
+        description: A permalink to the product.
+      responses:
+        '204':
+          description: The Product has been deleted.
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products/{string}/variants/new":
+    get:
+      operationId: getProductVariantAttributes
+      parameters:
+      - name: string
+        in: path
+        type: string
+        required: true
+        description: A permalink to the product.
+      responses:
+        '200':
+          description: The ProductVariantAttirbutes have been fetched.
+          schema:
+            "$ref": "#/definitions/ProductVariantAttributeResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products/{string}/variants":
+    get:
+      operationId: getProductVariantsFromProductPermalink
+      parameters:
+      - name: string
+        in: path
+        required: true
+        type: string
+        description: Permalink of the Product to get variants for
+      - name: sku_cont
+        type: string
+        in: query
+        description: Used to search for a particular variant
+      - name: show_deleted
+        in: query
+        type: boolean
+        description: 'true to show deleted products. false to hide them. Default:
+          false. Only available to users with an admin role.'
+      - name: page
+        in: query
+        type: integer
+        minimum: 0
+        description: The page number of product variants to display.
+      - name: per_page
+        in: query
+        type: integer
+        minimum: 0
+        description: The number of product variants to return per page
+      responses:
+        '200':
+          description: A list of product variants has been fetched
+          schema:
+            "$ref": "#/definitions/GetAllVariantsResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createProductVariant
+      parameters:
+      - name: string
+        in: path
+        type: string
+        required: true
+        description: A permalink to the product.
+      - name: variant
+        in: body
+        schema:
+          "$ref": "#/definitions/NewProductVariant"
+      responses:
+        '200':
+          description: A new ProductVariant has been fetched.
+          schema:
+            "$ref": "#/definitions/ProductVariant"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products/{string}/variants/{id}":
+    get:
+      operationId: getProductVariantByIDFromProductPermalink
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+      - name: string
+        in: path
+        type: string
+        required: true
+        description: The permalink of the product
+      responses:
+        '200':
+          description: A list of product variants has been fetched
+          schema:
+            "$ref": "#/definitions/GetVariantByIdVariant"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateProductVariant
+      parameters:
+      - name: string
+        in: path
+        type: string
+        required: true
+        description: A permalink to the product.
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+        description: The ID of the product variant to update.
+      - name: variant
+        in: body
+        schema:
+          "$ref": "#/definitions/NewProductVariant"
+      responses:
+        '200':
+          description: ProductVariant has been updated.
+          schema:
+            "$ref": "#/definitions/ProductVariant"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteProductVariant
+      parameters:
+      - name: string
+        in: path
+        type: string
+        required: true
+        description: A permalink to the product.
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+        description: The ID of the product variant to update.
+      responses:
+        '204':
+          description: ProductVariant has been deleted.
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products/new":
+    get:
+      operationId: getProductAttributes
+      responses:
+        '200':
+          description: Product attributes have been fetched.
+          schema:
+            "$ref": "#/definitions/ProductAttributesResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products/{id}/product_properties":
+    get:
+      operationId: getProductPropertiesByID
+      parameters:
+      - name: q
+        in: query
+        type: string
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+        description: The ID of the Product you want to retrieve.
+      - name: page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+        description: The page number of product properties to display.
+      - name: per_page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+        description: The number of product properties to return per page
+      responses:
+        '200':
+          description: The list of Product Properties have been fetched.
+          schema:
+            "$ref": "#/definitions/ProductPropertyListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createProductPropertyForProduct
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+        description: The ID of the Product you want to create a property for.
+      - name: product_property
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/ProductProperty"
+      responses:
+        '201':
+          description: The ProductProperty has been created.
+          schema:
+            "$ref": "#/definitions/ProductProperty"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products/{id}/product_properties/{property_name}":
+    get:
+      operationId: getProductPropertyByName
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+        description: The ID of the Product you want to retrieve.
+      - name: property_name
+        in: path
+        type: string
+        required: true
+      responses:
+        '200':
+          description: The ProductProperty has been fetched.
+          schema:
+            "$ref": "#/definitions/ProductProperty"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateProductPropertyByName
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+        description: The ID of the Product you want to retrieve.
+      - name: property_name
+        in: path
+        type: string
+        required: true
+        description: The name of the ProductProperty.
+      - name: product_property
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/ProductProperty"
+      responses:
+        '200':
+          description: The ProductProperty has been updated.
+          schema:
+            "$ref": "#/definitions/ProductProperty"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteProductPropertyByName
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+        description: The ID of the Product you want to retrieve.
+      - name: property_name
+        in: path
+        type: string
+        required: true
+        description: The name of the ProductProperty.
+      responses:
+        '204':
+          description: The ProductProperty has been deleted.
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products/{string}/images":
+    get:
+      operationId: getProductImagesByPermalink
+      parameters:
+      - name: string
+        required: true
+        in: path
+        type: string
+        description: A permalink to the product.
+      responses:
+        '200':
+          description: A list of ProductImage's have been fetched.
+          schema:
+            "$ref": "#/definitions/ImageListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createProductImage
+      consumes:
+      - multipart/form-data
+      parameters:
+      - name: string
+        required: true
+        in: path
+        type: string
+        description: A permalink to the product.
+      - name: image
+        in: body
+        schema:
+          "$ref": "#/definitions/NewImage"
+      responses:
+        '201':
+          description: ProductImage Created
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products/{string}/images/{image_id}":
+    get:
+      operationId: getProductImageByID
+      parameters:
+      - name: string
+        required: true
+        in: path
+        type: string
+        description: A permalink to the product.
+      - name: image_id
+        required: true
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        description: The id of the product image you want to retrieve.
+      responses:
+        '200':
+          description: A ProductImage has been fetched.
+          schema:
+            "$ref": "#/definitions/Image"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateProductImageByID
+      consumes:
+      - multipart/form-data
+      parameters:
+      - name: string
+        in: path
+        required: true
+        type: string
+        description: A permalink to the product.
+      - name: image_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+        description: The id of the product image you want to update.
+      - name: image
+        in: body
+        schema:
+          "$ref": "#/definitions/UpdateImage"
+      responses:
+        '201':
+          description: ProductImage Updated
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteProductImageByID
+      parameters:
+      - name: string
+        in: path
+        required: true
+        type: string
+        description: A permalink to the product.
+      - name: image_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+        description: The id of the product image you want to delete.
+      responses:
+        '204':
+          description: ProductImage Deleted
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/products/{string}/images/new":
+    get:
+      operationId: getProductImageAttributes
+      parameters:
+      - name: string
+        in: path
+        required: true
+        type: string
+        description: A permalink to the product.
+      responses:
+        '200':
+          description: ProductImageAttributes have been retrieved.
+          schema:
+            "$ref": "#/definitions/ImageAttributesResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/variants":
+    get:
+      operationId: getProductVariants
+      parameters:
+      - name: product_id
+        in: query
+        type: string
+        description: Query to limit product variants to a specific product id.
+      - name: sku_cont
+        type: string
+        in: query
+        description: Used to search for a particular variant
+      - name: show_deleted
+        in: query
+        type: boolean
+        description: 'true to show deleted products. false to hide them. Default:
+          false. Only available to users with an admin role.'
+      - name: page
+        in: query
+        type: integer
+        minimum: 0
+        description: The page number of product variants to display.
+      - name: per_page
+        in: query
+        type: integer
+        minimum: 0
+        description: The number of product variants to return per page
+      responses:
+        '200':
+          description: A list of product variants has been fetched
+          schema:
+            "$ref": "#/definitions/GetAllVariantsResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createNewProductVariant
+      parameters:
+      - name: variant
+        in: body
+        schema:
+          "$ref": "#/definitions/NewProductVariant"
+      responses:
+        '201':
+          description: A Product has been created.
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/variants/{id}":
+    get:
+      operationId: getProductVariantByID
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+        description: Query to limit product variants to a specific product id.
+      responses:
+        '200':
+          description: The Product Variant has been retireved.
+          schema:
+            "$ref": "#/definitions/GetVariantByIdVariant"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createProductVariantById
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+        description: Query to limit product variants to a specific product id.
+      - name: product_variant
+        in: body
+        schema:
+          "$ref": "#/definitions/NewProduct"
+      responses:
+        '201':
+          description: Product Variant has been created.
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/option_types":
+    get:
+      operationId: getOptionTypes
+      parameters:
+      - name: ids
+        in: query
+        type: string
+        required: true
+        description: Comma seperated list of option type ids. Specifying this will
+          display the respective option types.
+      - name: q
+        in: query
+        type: string
+      responses:
+        '200':
+          description: A list of OptionTypes have been retrieved
+          schema:
+            "$ref": "#/definitions/OptionType"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createNewOptionType
+      parameters:
+      - name: option_type
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/OptionType"
+      responses:
+        '201':
+          description: An OptionType has been created
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/option_types/{id}":
+    get:
+      operationId: getOptionTypeById
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+      responses:
+        '200':
+          description: The OptionType has been retrieved
+          schema:
+            "$ref": "#/definitions/OptionType"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateOptionTypeById
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+      - name: option_type
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/OptionType"
+      responses:
+        '201':
+          description: The OptionType has been updated
+          schema:
+            "$ref": "#/definitions/OptionType"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/option_types/new":
+    get:
+      operationId: getOptionTypeAttributes
+      responses:
+        '200':
+          description: OptionType attributes list has been retrieved.
+          schema:
+            "$ref": "#/definitions/OptionTypeAttributeListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/option_values":
+    get:
+      operationId: getOptionValues
+      parameters:
+      - name: q
+        in: query
+        type: string
+      - name: ids
+        in: query
+        type: string
+        description: A comma-separated list of option value ids.
+      - name: option_type_id
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+        description: Specifying this parameter will display option values of respective
+          option type
+      responses:
+        '200':
+          description: A list of OptionValues have been retrieved
+          schema:
+            "$ref": "#/definitions/OptionValueList"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createOptionValue
+      parameters:
+      - name: option_value
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/OptionValue"
+      responses:
+        '201':
+          description: OptionValue has been created.
+          schema:
+            "$ref": "#/definitions/OptionValue"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/option_values/{id}":
+    get:
+      operationId: getOptionValueById
+      parameters:
+      - name: id
+        type: integer
+        format: int64
+        minimum: 0
+        in: path
+        required: true
+      responses:
+        '200':
+          description: The OptionValue has been retrieved
+          schema:
+            "$ref": "#/definitions/OptionValue"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateOptionValueById
+      parameters:
+      - name: id
+        type: integer
+        format: int64
+        minimum: 0
+        in: path
+        required: true
+      - name: option_value
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/OptionValue"
+      responses:
+        '201':
+          description: The OptionValue has been updated
+          schema:
+            "$ref": "#/definitions/OptionValue"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteOptionValueById
+      parameters:
+      - name: id
+        type: integer
+        format: int64
+        minimum: 0
+        in: path
+        required: true
+      responses:
+        '204':
+          description: The OptionValue has been deleted
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/option_values/new":
+    get:
+      operationId: getOptionValueAttributes
+      responses:
+        '200':
+          description: OptionValue attributes list has been retrieved.
+          schema:
+            "$ref": "#/definitions/OptionValueAttributeListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders":
+    get:
+      operationId: getOrders
+      parameters:
+      - name: page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: per_page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: q[updated_at_gteq]
+        in: query
+        type: string
+        format: date
+      responses:
+        '200':
+          description: A list of Orders have been retrieved
+          schema:
+            "$ref": "#/definitions/GetAllOrdersOrderListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createNewOrder
+      parameters:
+      - name: order
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetOrderByIdOrder"
+      responses:
+        '201':
+          description: The Order has been created
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders.json":
+    post:
+      operationId: createBlankOrder
+      responses:
+        '201':
+          description: A blank Order has been created
+          schema:
+            "$ref": "#/definitions/GetOrderByIdOrder"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{order_number}/line_items.json":
+    post:
+      operationId: addLineItemToOrder
+      parameters:
+      - name: order_number
+        in: path
+        required: true
+        type: string
+      - name: line_item
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetOrderByIdLineItem"
+      responses:
+        '201':
+          description: The LineItem has been added to the order
+          schema:
+            "$ref": "#/definitions/LineItem"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}":
+    get:
+      operationId: getOrderById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: The Order has been retrieved.
+          schema:
+            "$ref": "#/definitions/GetOrderByIdOrder"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateOrderById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: order
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetOrderByIdOrder"
+      responses:
+        '200':
+          description: The order has been updated
+          schema:
+            "$ref": "#/definitions/GetOrderByIdOrder"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/empty":
+    put:
+      operationId: emptyOrderById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: The Order has been emptied.
+          schema:
+            "$ref": "#/definitions/GetOrderByIdOrder"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/line_items":
+    post:
+      operationId: creatOrderLineItem
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: line_item
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/LineItem"
+      responses:
+        '201':
+          description: The LineItem has been created.
+          schema:
+            "$ref": "#/definitions/LineItem"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/line_items/{line_item_id}":
+    put:
+      operationId: updateOrderLineItemById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: line_item_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: line_item
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/LineItem"
+      responses:
+        '201':
+          description: The LineItem has been updated
+          schema:
+            "$ref": "#/definitions/LineItem"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteLineItemById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: line_item_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '204':
+          description: The LineItem has been deleted
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/return_authorizations":
+    get:
+      operationId: getOrderReturnAuthorizations
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: page
+        type: integer
+        format: int64
+        minimum: 0
+        in: query
+      - name: per_page
+        type: integer
+        format: int64
+        minimum: 0
+        in: query
+      - name: q
+        in: query
+        type: string
+      responses:
+        '200':
+          description: The Order has been retrieved.
+          schema:
+            "$ref": "#/definitions/ReturnAuthorizationListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createReturnAuthorization
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: return_authorization
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/ReturnAuthorization"
+      responses:
+        '201':
+          description: The ReturnAuthorization has been retrieved.
+          schema:
+            "$ref": "#/definitions/ReturnAuthorization"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/return_authorizations/{return_authorization_id}":
+    get:
+      operationId: getOrderReturnAuthorizationById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: return_authorization_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: ReturnAuthorization retrieved.
+          schema:
+            "$ref": "#/definitions/ReturnAuthorization"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateReturnAuthorizationById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: return_authorization_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: return_authorization
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/ReturnAuthorization"
+      responses:
+        '200':
+          description: The ReturnAuthorization has been updated
+          schema:
+            "$ref": "#/definitions/ReturnAuthorization"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteReturnAuthorizationById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: return_authorization_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '204':
+          description: The ReturnAuthorization has been deleted
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/payments":
+    get:
+      operationId: getOrderPayments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: page
+        type: integer
+        format: int64
+        minimum: 0
+        in: query
+      - name: per_page
+        type: integer
+        format: int64
+        minimum: 0
+        in: query
+      - name: q
+        in: query
+        type: string
+      responses:
+        '200':
+          description: The Payments for this order have been retrieved.
+          schema:
+            "$ref": "#/definitions/PaymentListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createPayment
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: payment
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/Payment"
+      responses:
+        '201':
+          description: The Payment has been created.
+          schema:
+            "$ref": "#/definitions/Payment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/payments/{payment_id}":
+    get:
+      operationId: getOrderPaymentById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: payment_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: The Payment has been retrieved.
+          schema:
+            "$ref": "#/definitions/Payment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/payments/{payment_id}/authorize":
+    put:
+      operationId: authorizePaymentById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: payment_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: The Payment has been authorized.
+          schema:
+            "$ref": "#/definitions/Payment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/payments/{payment_id}/capture":
+    put:
+      operationId: capturePaymentById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: payment_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: The Payment has been captured.
+          schema:
+            "$ref": "#/definitions/Payment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/payments/{payment_id}/purchase":
+    put:
+      operationId: makePurchaseWithPayment
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: payment_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: A purchase has been made with this Payment.
+          schema:
+            "$ref": "#/definitions/Payment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/payments/{payment_id}/void":
+    put:
+      operationId: voidPayment
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: payment_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: The Payment has been voided.
+          schema:
+            "$ref": "#/definitions/Payment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/payments/{payment_id}/credit":
+    put:
+      operationId: creditPayment
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: payment_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: amount
+        in: query
+        required: true
+        type: number
+        description: The amount to credit a payment. If the amount is over the payments
+          credit allowed, a Credit Over Limit response will be returned.
+      responses:
+        '200':
+          description: A credit has been added to the Payment.
+          schema:
+            "$ref": "#/definitions/Payment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/payments/new":
+    get:
+      operationId: getOrderPaymentAttributes
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: The Payment attribute list have been retrieved.
+          schema:
+            "$ref": "#/definitions/PaymentAttributeListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/orders/{id}/addresses/{address_id}":
+    get:
+      operationId: getAddressById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: address_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: order_token
+        type: string
+        in: query
+        required: false
+      responses:
+        '200':
+          description: The Address has been retrieved.
+          schema:
+            "$ref": "#/definitions/Address"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateAddressById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+      - name: address_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: address
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/NewAddress"
+      responses:
+        '200':
+          description: The order address has been updated
+          schema:
+            "$ref": "#/definitions/Address"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/shipments/mine":
+    get:
+      operationId: getYourShipments
+      parameters:
+      - name: page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: per_page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: Your shipments have been retireved
+          schema:
+            "$ref": "#/definitions/GetAllShipmentListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/shipments":
+    post:
+      operationId: createNewShipment
+      parameters:
+      - name: shipment
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/Shipment"
+      responses:
+        '200':
+          description: Your shipments has been created
+          schema:
+            "$ref": "#/definitions/GetAllShipmentsShipment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/shipments/{order_id}":
+    put:
+      operationId: updateShipment
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        type: string
+      - name: shipment
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetAllShipmentsShipment"
+      responses:
+        '200':
+          description: Your shipments has been updated
+          schema:
+            "$ref": "#/definitions/NewShipment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createNewOrderShipment
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        type: string
+      - name: shipment
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetAllShipmentsShipment"
+      responses:
+        '200':
+          description: Your shipments has been created
+          schema:
+            "$ref": "#/definitions/NewShipment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/shipments/{shipment_id}/ready":
+    put:
+      operationId: markShipmentAsReady
+      parameters:
+      - name: shipment_id
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Your shipments has been marked as ready
+          schema:
+            "$ref": "#/definitions/NewShipment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/shipments/{shipment_id}/ship":
+    put:
+      operationId: shipShipment
+      parameters:
+      - name: shipment_id
+        in: path
+        required: true
+        type: string
+      - name: shipment
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetAllShipmentsShipment"
+      responses:
+        '200':
+          description: Your shipments has been marked as shipped
+          schema:
+            "$ref": "#/definitions/NewShipment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/shipments/{shipment_id}/add":
+    put:
+      operationId: addShipmentVariant
+      parameters:
+      - name: shipment_id
+        in: path
+        required: true
+        type: string
+      - name: shipment
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetAllShipmentsShipment"
+      responses:
+        '200':
+          description: The shipment has had a variant added.
+          schema:
+            "$ref": "#/definitions/NewShipment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/shipments/{shipment_id}/remove":
+    put:
+      operationId: removeShipmentVariant
+      parameters:
+      - name: shipment_id
+        in: path
+        required: true
+        type: string
+      - name: variant_id
+        in: query
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: quantity
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: The shipment has had a variant removed.
+          schema:
+            "$ref": "#/definitions/NewShipment"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/stock_locations":
+    get:
+      operationId: getStockLocations
+      parameters:
+      - name: q
+        in: query
+        type: string
+      - name: page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: per_page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: A list of stock locations has been retrieved
+          schema:
+            "$ref": "#/definitions/StockLocationListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createNewStockLocation
+      parameters:
+      - name: stock_location
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/NewStockLocation"
+      responses:
+        '201':
+          description: The StockLocation has been created.
+          schema:
+            "$ref": "#/definitions/StockLocation"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/stock_locations/{id}":
+    get:
+      operationId: getStockLocationById
+      parameters:
+      - name: id
+        type: integer
+        format: int64
+        in: path
+        required: true
+        minimum: 0
+      responses:
+        '200':
+          description: The StockLocation has been retrieved.
+          schema:
+            "$ref": "#/definitions/StockLocation"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateStockLocationById
+      parameters:
+      - name: id
+        type: integer
+        format: int64
+        in: path
+        required: true
+        minimum: 0
+      - name: stock_location
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/NewStockLocation"
+      responses:
+        '201':
+          description: The StockLocation has been updated.
+          schema:
+            "$ref": "#/definitions/StockLocation"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteStockLocationById
+      parameters:
+      - name: id
+        type: integer
+        format: int64
+        in: path
+        required: true
+        minimum: 0
+      responses:
+        '204':
+          description: The StockLocation has been deleted.
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/stock_locations/{id}/stock_items":
+    get:
+      operationId: getStockItemsForStockLocation
+      parameters:
+      - name: q[variant_id_eq]
+        in: query
+        type: string
+      - name: page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: per_page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: A list of stock items for the stock location have been retrieved
+          schema:
+            "$ref": "#/definitions/GetAllStockItemListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createStockItemForStockLocation
+      parameters:
+      - name: stock_item
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/NewStockItem"
+      - name: id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '201':
+          description: StockItem has been created.
+          schema:
+            "$ref": "#/definitions/StockItem"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/stock_locations/{location_id}/stock_items/{stock_item_id}":
+    get:
+      operationId: getStockItemById
+      parameters:
+      - name: location_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: stock_item_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: A stock item has been retireved
+          schema:
+            "$ref": "#/definitions/StockItem"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateStockItemById
+      parameters:
+      - name: stock_item
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/NewStockItem"
+      - name: location_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: stock_item_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '201':
+          description: Stock item has been updated.
+          schema:
+            "$ref": "#/definitions/StockItem"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteStockItemById
+      parameters:
+      - name: location_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: stock_item_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '204':
+          description: Stock item has been deleted.
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/stock_locations/{id}/stock_movements":
+    get:
+      operationId: getStockMovementsForStockLocation
+      parameters:
+      - name: q
+        in: query
+        type: string
+      - name: page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: per_page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: A list of stock movements for the stock location have been
+            retrieved
+          schema:
+            "$ref": "#/definitions/GetAllStockMovementListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createStockMovementForStockLocation
+      parameters:
+      - name: stock_movement
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/NewStockMovement"
+      - name: id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '201':
+          description: Stock movement has been created.
+          schema:
+            "$ref": "#/definitions/StockMovement"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/stock_locations/{location_id}/stock_movements/{stock_movement_id}":
+    get:
+      operationId: getStockMovementById
+      parameters:
+      - name: location_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: stock_movement_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: StockMovement has been retrieved
+          schema:
+            "$ref": "#/definitions/StockMovement"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateStockMovementById
+      parameters:
+      - name: stock_movement
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/NewStockMovement"
+      - name: location_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: stock_movement_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '201':
+          description: Stock movement has been updated.
+          schema:
+            "$ref": "#/definitions/StockMovement"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteStockMovementById
+      parameters:
+      - name: location_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: stock_movement_id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '204':
+          description: Stock movement has been deleted.
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/taxonomies":
+    get:
+      operationId: getTaxonomies
+      parameters:
+      - name: q
+        in: query
+        type: string
+      - name: page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: per_page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: set
+        in: query
+        type: string
+        description: Displays the complete expanded taxonomy tree if set to "nested".
+      responses:
+        '200':
+          description: A list of taxonomies have been retrieved
+          schema:
+            "$ref": "#/definitions/GetAllTaxonomiesTaxonomyListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createTaxonomy
+      parameters:
+      - name: taxonomy
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetAllTaxonomiesTaxonomy"
+      responses:
+        '201':
+          description: Taxonomy has been created
+          schema:
+            "$ref": "#/definitions/GetAllTaxonomiesTaxonomy"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/taxonomies/{id}":
+    get:
+      operationId: getTaxonomyById
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+      responses:
+        '200':
+          description: Taxonomy has been retrieved
+          schema:
+            "$ref": "#/definitions/GetAllTaxonomiesTaxonomy"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateTaxonomyById
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+        format: int64
+        minimum: 0
+      - name: taxonomy
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetAllTaxonomiesTaxonomy"
+      responses:
+        '201':
+          description: Taxonomy has been updated
+          schema:
+            "$ref": "#/definitions/GetAllTaxonomiesTaxonomy"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteTaxonomyById
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+      responses:
+        '204':
+          description: Taxonomy has been deleted
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/taxonomies/{id}/taxons":
+    get:
+      operationId: getTaxonomyTaxonList
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+      - name: without_children
+        in: query
+        type: boolean
+        description: Displays only immediate children of taxons if set to "true"
+      responses:
+        '200':
+          description: Taxonomy taxons have been retrieved
+          schema:
+            "$ref": "#/definitions/GetTaxonomyTaxonsTaxonListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createTaxonForTaxonomy
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+      - name: taxon
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/Taxon"
+      responses:
+        '201':
+          description: Taxon has been created for Taxonomy
+          schema:
+            "$ref": "#/definitions/Taxon"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/taxonomies/{id}/taxons/{taxon_id}":
+    get:
+      operationId: getTaxonomyTaxonById
+      parameters:
+      - name: id
+        format: int64
+        minimum: 0
+        type: integer
+        in: path
+        required: true
+      - name: taxon_id
+        format: int64
+        minimum: 0
+        type: integer
+        in: path
+        required: true
+      responses:
+        '200':
+          description: Taxon has been retrieved.
+          schema:
+            "$ref": "#/definitions/Taxon"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateTaxonomyTaxonById
+      parameters:
+      - name: id
+        format: int64
+        minimum: 0
+        type: integer
+        in: path
+        required: true
+      - name: taxon_id
+        format: int64
+        minimum: 0
+        type: integer
+        in: path
+        required: true
+      - name: taxon
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/Taxon"
+      responses:
+        '201':
+          description: Taxon has been updated
+          schema:
+            "$ref": "#/definitions/Taxon"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteTaxonomyTaxonById
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+      - name: taxon_id
+        in: path
+        type: integer
+        format: int64
+        minimum: 0
+        required: true
+      responses:
+        '204':
+          description: Taxon has been deleted
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/zones":
+    get:
+      operationId: getAllZones
+      parameters:
+      - name: q
+        in: query
+        type: string
+      - name: page
+        in: query
+        type: integer
+        format: int64
+        minimum: 0
+      - name: per_page
+        in: query
+        type: integer
+        format: int64
+      responses:
+        '200':
+          description: A list of Zones has been retrieved
+          schema:
+            "$ref": "#/definitions/GetAllZonesZoneListResponse"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    post:
+      operationId: createZone
+      parameters:
+      - name: zone
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetAllZonesZone"
+      responses:
+        '201':
+          description: The Zone has been created.
+          schema:
+            "$ref": "#/definitions/Zone"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+  "/zones/{id}":
+    get:
+      operationId: getZoneId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      responses:
+        '200':
+          description: The Zone has been retrieved.
+          schema:
+            "$ref": "#/definitions/Zone"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    put:
+      operationId: updateZoneId
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        required: true
+        minimum: 0
+      - name: zone
+        in: body
+        required: true
+        schema:
+          "$ref": "#/definitions/GetAllZonesZone"
+      responses:
+        '200':
+          description: The Zone has been updated.
+          schema:
+            "$ref": "#/definitions/Zone"
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+    delete:
+      operationId: deleteZoneById
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        format: int64
+        required: true
+        minimum: 0
+      responses:
+        '204':
+          description: The Zone has been deleted.
+        default:
+          description: Error
+          schema:
+            "$ref": "#/definitions/NotOkayResponse"
+definitions:
+  NotOkayResponseErrors:
+    additionalProperties:
+      type: string
+    type: object
+  NotOkayResponse:
+    properties:
+      error:
+        type: string
+      errors:
+        "$ref": "#/definitions/NotOkayResponseErrors"
+    type: object
+  OrderDelivery:
+    properties:
+      order:
+        "$ref": "#/definitions/OrderDeliverySchema"
+      payment_source:
+        "$ref": "#/definitions/OrderPaymentSource"
+    type: object
+  OrderPaymentSource:
+    type: object
+  OrderDeliverySchema:
+    properties:
+      bill_address_attributes:
+        "$ref": "#/definitions/NewAddress"
+      ship_address_attributes:
+        "$ref": "#/definitions/NewAddress"
+      payment_attributes:
+        "$ref": "#/definitions/PaymentMethodAttribute"
+      existing_card:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  PaymentMethodAttribute:
+    items:
+      "$ref": "#/definitions/PaymentMethodAttributeItem"
+    type: array
+  PaymentMethodAttributeItem:
+    properties:
+      payment_method_id:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  Address:
+    properties:
+      firstname:
+        type: string
+      lastname:
+        type: string
+      full_name:
+        type: string
+      address1:
+        type: string
+      address2:
+        type: string
+      city:
+        type: string
+      zipcode:
+        type: string
+      phone:
+        type: string
+      company:
+        type: string
+      alternative_phone:
+        type: string
+      country_id:
+        type: integer
+        format: int64
+        minimum: 0
+      state_id:
+        type: integer
+        format: int64
+        minimum: 0
+      state_name:
+        type: string
+      state_text:
+        type: string
+      country:
+        "$ref": "#/definitions/Country"
+      state:
+        "$ref": "#/definitions/State"
+    type: object
+  NewAddress:
+    properties:
+      firstname:
+        type: string
+      lastname:
+        type: string
+      full_name:
+        type: string
+      address1:
+        type: string
+      address2:
+        type: string
+      city:
+        type: string
+      zipcode:
+        type: string
+      phone:
+        type: string
+      company:
+        type: string
+      alternative_phone:
+        type: string
+      country_id:
+        type: integer
+        format: int64
+        minimum: 0
+      state_id:
+        type: integer
+        format: int64
+        minimum: 0
+      state_name:
+        type: string
+    type: object
+  GetAllProductsResponse:
+    properties:
+      products:
+        "$ref": "#/definitions/GetAllProductsList"
+      count:
+        type: integer
+        format: int32
+        minimum: 0
+      pages:
+        type: integer
+        format: int32
+        minimum: 0
+      current_page:
+        type: integer
+        format: int32
+        minimum: 0
+    type: object
+  GetAllProductsList:
+    items:
+      "$ref": "#/definitions/GetAllProductsProduct"
+    type: array
+  ProductListResponse:
+    properties:
+      products:
+        "$ref": "#/definitions/ProductList"
+      count:
+        type: integer
+        format: int32
+        minimum: 0
+      pages:
+        type: integer
+        format: int32
+        minimum: 0
+      current_page:
+        type: integer
+        format: int32
+        minimum: 0
+    type: object
+  ProductList:
+    items:
+      "$ref": "#/definitions/Product"
+    type: array
+  GetAllProductsProduct:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      description:
+        type: string
+      price:
+        type: string
+      display_price:
+        type: string
+      available_on:
+        type: string
+        format: datetime
+      slug:
+        type: string
+      meta_description:
+        type: string
+      meta_keywords:
+        type: string
+      shipping_category_id:
+        type: integer
+        format: int64
+        minimum: 0
+      total_on_hand:
+        type: integer
+      master:
+        "$ref": "#/definitions/GetAllProductsMaster"
+      has_variants:
+        type: boolean
+    type: object
+  GetProductByIdProduct:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      description:
+        type: string
+      price:
+        type: string
+      display_price:
+        type: string
+      available_on:
+        type: string
+        format: datetime
+      slug:
+        type: string
+      meta_description:
+        type: string
+      meta_keywords:
+        type: string
+      shipping_category_id:
+        type: integer
+        format: int64
+        minimum: 0
+      taxon_ids:
+        "$ref": "#/definitions/IDList"
+      total_on_hand:
+        type: integer
+      master:
+        "$ref": "#/definitions/GetProductByIdMaster"
+      variants:
+        "$ref": "#/definitions/GetProductByIdVariantList"
+      option_types:
+        "$ref": "#/definitions/GetProductByIdOptionTypeList"
+      product_properties:
+        "$ref": "#/definitions/ProductPropertyList"
+      classifications:
+        "$ref": "#/definitions/GetProductByIdClassificationList"
+    type: object
+  Product:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      description:
+        type: string
+      price:
+        type: string
+      display_price:
+        type: string
+      available_on:
+        type: string
+        format: datetime
+      slug:
+        type: string
+      meta_description:
+        type: string
+      meta_keywords:
+        type: string
+      shipping_category_id:
+        type: integer
+        format: int64
+        minimum: 0
+      total_on_hand:
+        type: integer
+      master:
+        "$ref": "#/definitions/Master"
+      variants:
+        "$ref": "#/definitions/ProductVariantList"
+      option_types:
+        "$ref": "#/definitions/OptionTypeList"
+      product_properties:
+        "$ref": "#/definitions/ProductPropertyList"
+      classifications:
+        "$ref": "#/definitions/ClassificationList"
+    type: object
+  NewProduct:
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      price:
+        type: string
+      display_price:
+        type: string
+      available_on:
+        type: string
+        format: datetime
+      slug:
+        type: string
+      meta_description:
+        type: string
+      meta_keywords:
+        type: string
+      taxon_ids:
+        "$ref": "#/definitions/IDList"
+      total_on_hand:
+        type: integer
+      shipping_category:
+        type: string
+    type: object
+  NewProductVariant:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: string
+      width:
+        type: string
+      depth:
+        type: string
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      option_value_ids:
+        "$ref": "#/definitions/IDList"
+      image_ids:
+        "$ref": "#/definitions/IDList"
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: boolean
+      total_on_hand:
+        type: integer
+        format: int64
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  ProductAttributesResponse:
+    properties:
+      attributes:
+        "$ref": "#/definitions/ProductAttributeList"
+      required_attributes:
+        "$ref": "#/definitions/ProductAttributeList"
+    type: object
+  ProductAttributeList:
+    items:
+      type: string
+    type: array
+  GetProductByIdMaster:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: string
+      width:
+        type: string
+      depth:
+        type: string
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_ordeable:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      total_on_hand:
+        type: integer
+        format: int32
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  GetAllProductsMaster:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: string
+      width:
+        type: string
+      depth:
+        type: string
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_ordeable:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      total_on_hand:
+        type: integer
+        format: int32
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  Master:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: string
+      width:
+        type: string
+      depth:
+        type: string
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      total_on_hand:
+        type: integer
+        format: int32
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  GetProductByIdClassificationList:
+    items:
+      "$ref": "#/definitions/GetProductByIdClassification"
+    type: array
+  GetProductByIdClassification:
+    properties:
+      taxon_id:
+        type: integer
+        format: int64
+        minimum: 0
+      position:
+        type: integer
+        format: int32
+        minimum: 0
+      taxon:
+        "$ref": "#/definitions/GetProductByIdTaxon"
+      has_variants:
+        type: boolean
+    type: object
+  ClassificationList:
+    items:
+      "$ref": "#/definitions/Classification"
+    type: array
+  Classification:
+    properties:
+      taxon_id:
+        type: integer
+        format: int64
+        minimum: 0
+      position:
+        type: integer
+        format: int32
+        minimum: 0
+      taxon:
+        "$ref": "#/definitions/Taxon"
+      has_variants:
+        type: boolean
+    type: object
+  GetAllTaxonomiesTaxonomyListResponse:
+    properties:
+      taxonomies:
+        "$ref": "#/definitions/GetAllTaxonomiesTaxonomyList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  TaxonomyListResponse:
+    properties:
+      taxonomies:
+        "$ref": "#/definitions/TaxonomyList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  GetAllTaxonomiesTaxonomyList:
+    items:
+      "$ref": "#/definitions/Taxonomy"
+    type: array
+  TaxonomyList:
+    items:
+      "$ref": "#/definitions/Taxonomy"
+    type: array
+  GetAllTaxonomiesTaxonomy:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      root:
+        "$ref": "#/definitions/TaxonomyRoot"
+    type: object
+  Taxonomy:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      root:
+        "$ref": "#/definitions/GetAllTaxonomiesTaxonomyRoot"
+    type: object
+  GetAllTaxonomiesTaxonomyRoot:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      pretty_name:
+        type: string
+      permalink:
+        type: string
+      parent_id:
+        type: integer
+        format: int64
+        minimum: 0
+      taxonomy_id:
+        type: integer
+        format: int64
+        minimum: 0
+      meta_title:
+        type: string
+      meta_description:
+        type: string
+    type: object
+  TaxonomyRoot:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      pretty_name:
+        type: string
+      permalink:
+        type: string
+      parent_id:
+        type: integer
+        format: int64
+        minimum: 0
+      taxonomy_id:
+        type: integer
+        format: int64
+        minimum: 0
+      meta_title:
+        type: string
+      meta_description:
+        type: string
+      taxons:
+        "$ref": "#/definitions/TaxonList"
+    type: object
+  GetTaxonomyTaxonsTaxonListResponse:
+    properties:
+      taxons:
+        "$ref": "#/definitions/GetTaxonomyTaxonsTaxonList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      total_count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      per_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  TaxonListResponse:
+    properties:
+      taxons:
+        "$ref": "#/definitions/TaxonList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      total_count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      per_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  GetTaxonomyTaxonsTaxonList:
+    items:
+      "$ref": "#/definitions/GetTaxonomyTaxonsTaxon"
+    type: array
+  TaxonList:
+    items:
+      "$ref": "#/definitions/Taxon"
+    type: array
+  GetProductByIdTaxon:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      pretty_name:
+        type: string
+      permalink:
+        type: string
+      parent_id:
+        type: integer
+        format: int64
+        minimum: 0
+      taxonomy_id:
+        type: integer
+        format: int64
+        minimum: 0
+      meta_title:
+        type: string
+      meta_description:
+        type: string
+    type: object
+  GetTaxonomyTaxonsTaxon:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      pretty_name:
+        type: string
+      permalink:
+        type: string
+      parent_id:
+        type: integer
+        format: int64
+        minimum: 0
+      taxonomy_id:
+        type: integer
+        format: int64
+        minimum: 0
+      meta_title:
+        type: string
+      meta_description:
+        type: string
+    type: object
+  Taxon:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      pretty_name:
+        type: string
+      permalink:
+        type: string
+      parent_id:
+        type: integer
+        format: int64
+        minimum: 0
+      taxonomy_id:
+        type: integer
+        format: int64
+        minimum: 0
+      meta_title:
+        type: string
+      meta_description:
+        type: string
+      taxons:
+        "$ref": "#/definitions/TaxonList"
+    type: object
+  GetAllVariantsResponse:
+    properties:
+      variants:
+        "$ref": "#/definitions/GetAllVariantsVariantList"
+      count:
+        type: integer
+        format: int32
+        minimum: 0
+      total_count:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int32
+        minimum: 0
+      current_page:
+        type: integer
+        format: int32
+        minimum: 0
+    type: object
+  ProductVariantListResponse:
+    properties:
+      variants:
+        "$ref": "#/definitions/ProductVariantList"
+      count:
+        type: integer
+        format: int32
+        minimum: 0
+      pages:
+        type: integer
+        format: int32
+        minimum: 0
+      current_page:
+        type: integer
+        format: int32
+        minimum: 0
+    type: object
+  GetAllVariantsVariantList:
+    items:
+      "$ref": "#/definitions/GetAllVariantsVariant"
+    type: array
+  ProductVariantList:
+    items:
+      "$ref": "#/definitions/ProductVariant"
+    type: array
+  ProductIdVariant:
+    properties:
+      product_id:
+        type: integer
+        format: int64
+        minimum: 0
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: integer
+        format: int32
+        minimum: 0
+      width:
+        type: integer
+        format: int32
+        minimum: 0
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: string
+      total_on_hand:
+        type: integer
+        format: int32
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  GetAllVariantsVariant:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: integer
+        format: int32
+        minimum: 0
+      width:
+        type: integer
+        format: int32
+        minimum: 0
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: string
+      total_on_hand:
+        type: integer
+        format: int32
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  GetProductByIdVariantList:
+    items:
+      "$ref": "#/definitions/GetProductByIdVariant"
+    type: array
+  GetProductByIdVariant:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: integer
+        format: int32
+        minimum: 0
+      width:
+        type: integer
+        format: int32
+        minimum: 0
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: string
+      total_on_hand:
+        type: integer
+        format: int32
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  GetVariantByIdVariant:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: integer
+        format: int32
+        minimum: 0
+      width:
+        type: integer
+        format: int32
+        minimum: 0
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      option_values:
+        "$ref": "#/definitions/OptionValueList"
+      images:
+        "$ref": "#/definitions/ImageList"
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: string
+      total_on_hand:
+        type: integer
+        format: int32
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  NewShipmentManifestProductVariant:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: integer
+        format: int32
+        minimum: 0
+      width:
+        type: integer
+        format: int32
+        minimum: 0
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: string
+      total_on_hand:
+        type: integer
+        format: int32
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  ProductVariant:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: integer
+        format: int32
+        minimum: 0
+      width:
+        type: integer
+        format: int32
+        minimum: 0
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      option_values:
+        "$ref": "#/definitions/OptionValueList"
+      images:
+        "$ref": "#/definitions/ImageList"
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: string
+      total_on_hand:
+        type: integer
+        format: int32
+        minimum: 0
+      is_destroyed:
+        type: boolean
+      stock_items:
+        "$ref": "#/definitions/StockItemList"
+    type: object
+  ProductVariantAttributeResponse:
+    properties:
+      attributes:
+        "$ref": "#/definitions/ProductVariantAttributeList"
+      required_attributes:
+        "$ref": "#/definitions/ProductVariantAttributeList"
+    type: object
+  ProductVariantAttributeList:
+    items:
+      type: string
+    type: array
+  ProductPropertyListResponse:
+    properties:
+      product_properties:
+        "$ref": "#/definitions/ProductPropertyList"
+      count:
+        type: integer
+        format: int32
+        minimum: 0
+      pages:
+        type: integer
+        format: int32
+        minimum: 0
+      current_page:
+        type: integer
+        format: int32
+        minimum: 0
+    type: object
+  ProductPropertyList:
+    items:
+      "$ref": "#/definitions/ProductProperty"
+    type: array
+  ProductProperty:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      product_id:
+        type: integer
+        format: int64
+        minimum: 0
+      property_id:
+        type: integer
+        format: int64
+        minimum: 0
+      value:
+        type: string
+      property_name:
+        type: string
+    type: object
+  NewProductPropertyValue:
+    properties:
+      product_property[value]:
+        type: string
+    type: object
+  OptionTypeListResponse:
+    properties:
+      option_types:
+        "$ref": "#/definitions/OptionTypeList"
+      count:
+        type: integer
+        format: int32
+        minimum: 0
+      pages:
+        type: integer
+        format: int32
+        minimum: 0
+      current_page:
+        type: integer
+        format: int32
+        minimum: 0
+    type: object
+  OptionTypeList:
+    items:
+      "$ref": "#/definitions/OptionType"
+    type: array
+  GetProductByIdOptionTypeList:
+    items:
+      "$ref": "#/definitions/GetProductByIdOptionType"
+    type: array
+  GetProductByIdOptionType:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      presentation:
+        type: string
+      option_type_name:
+        type: string
+      option_type_id:
+        type: integer
+        format: int32
+        minimum: 0
+      option_type_presentation:
+        type: string
+    type: object
+  OptionType:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      presentation:
+        type: string
+      option_type_name:
+        type: string
+      option_type_id:
+        type: integer
+        format: int32
+        minimum: 0
+      option_type_presentation:
+        type: string
+    type: object
+  OptionValueListResponse:
+    properties:
+      option_values:
+        "$ref": "#/definitions/OptionValueList"
+      count:
+        type: integer
+        format: int32
+        minimum: 0
+      pages:
+        type: integer
+        format: int32
+        minimum: 0
+      current_page:
+        type: integer
+        format: int32
+        minimum: 0
+    type: object
+  OptionValueList:
+    items:
+      "$ref": "#/definitions/OptionValue"
+    type: array
+  OptionValue:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      presentation:
+        type: string
+      option_type_name:
+        type: string
+      option_type_id:
+        type: integer
+      option_type_presentation:
+        type: string
+    type: object
+  ImageListResponse:
+    properties:
+      images:
+        "$ref": "#/definitions/ImageList"
+      count:
+        type: integer
+        format: int32
+        minimum: 0
+      pages:
+        type: integer
+        format: int32
+        minimum: 0
+      current_page:
+        type: integer
+        format: int32
+        minimum: 0
+    type: object
+  ImageList:
+    items:
+      "$ref": "#/definitions/Image"
+    type: array
+  Image:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      position:
+        type: integer
+        format: int64
+        minimum: 0
+      attachment_content_type:
+        type: string
+      attachment_file_name:
+        type: string
+      type:
+        type: string
+      attachment_updated_at:
+        type: string
+        format: datetime
+      attachment_width:
+        type: integer
+        format: int32
+        minimum: 0
+      attachment_height:
+        type: integer
+        format: int32
+        minimum: 0
+      alt:
+        type: string
+      viewable_type:
+        type: string
+      viewable_id:
+        type: integer
+        format: int64
+        minimum: 0
+      mini_url:
+        type: string
+      small_url:
+        type: string
+      product_url:
+        type: string
+      large_url:
+        type: string
+    type: object
+  NewImage:
+    properties:
+      attachment:
+        type: string
+      type:
+        type: string
+        description: The image type. e.g. - image/jpeg
+    type: object
+  UpdateImage:
+    properties:
+      attachment:
+        type: string
+      type:
+        type: string
+        description: The image type. e.g. - image/jpeg
+    type: object
+  ImageAttributesResponse:
+    properties:
+      attributes:
+        "$ref": "#/definitions/ImageAttributeList"
+      required_attributes:
+        "$ref": "#/definitions/ImageAttributeList"
+    type: object
+  ImageAttributeList:
+    items:
+      type: string
+    type: array
+  StockLocationListResponse:
+    properties:
+      stock_locations:
+        "$ref": "#/definitions/StockLocationList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  StockLocationList:
+    items:
+      "$ref": "#/definitions/StockLocation"
+    type: array
+  NewStockLocation:
+    properties:
+      name:
+        type: string
+    type: object
+  StockLocation:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      address1:
+        type: string
+      address2:
+        type: string
+      city:
+        type: string
+      state_id:
+        type: integer
+        format: int64
+        minimum: 0
+      state_name:
+        type: string
+      country_id:
+        type: integer
+        format: int64
+        minimum: 0
+      zipcode:
+        type: string
+      phone:
+        type: string
+      active:
+        type: boolean
+      country:
+        "$ref": "#/definitions/Country"
+      state:
+        "$ref": "#/definitions/State"
+    type: object
+  CountryListResponse:
+    properties:
+      countries:
+        "$ref": "#/definitions/CountryList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  CountryList:
+    items:
+      "$ref": "#/definitions/Country"
+    type: array
+  Country:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      iso_name:
+        type: string
+      iso:
+        type: string
+      iso3:
+        type: string
+      name:
+        type: string
+      numcode:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  GetCountryById:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      iso_name:
+        type: string
+      iso:
+        type: string
+      iso3:
+        type: string
+      name:
+        type: string
+      numcode:
+        type: integer
+        format: int64
+        minimum: 0
+      states:
+        $ref: '#/definitions/CountryStateList'
+    type: object
+  CountryStateList:
+    items:
+      $ref: '#/definitions/State'
+    type: array
+  State:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      abbr:
+        type: string
+      country_id:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  GetAllStockMovementListResponse:
+    properties:
+      stock_movements:
+        "$ref": "#/definitions/GetAllStockMovementList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  StockMovementListResponse:
+    properties:
+      stock_movements:
+        "$ref": "#/definitions/StockMovementList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  GetAllStockMovementList:
+    items:
+      "$ref": "#/definitions/GetAllStockMovement"
+    type: array
+  StockMovementList:
+    items:
+      "$ref": "#/definitions/StockMovement"
+    type: array
+  NewStockMovement:
+    properties:
+      quantity:
+        type: integer
+        format: int64
+        minimum: 0
+      stock_item_id:
+        type: integer
+        format: int64
+      action:
+        type: string
+    type: object
+  GetAllStockMovement:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      quantity:
+        type: integer
+        format: int64
+        minimum: 0
+      stock_item_id:
+        type: integer
+        format: int64
+        minimum: 0
+      stock_item:
+        "$ref": "#/definitions/GetAllStockItem"
+    type: object
+  StockMovement:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      quantity:
+        type: integer
+        format: int64
+        minimum: 0
+      stock_item_id:
+        type: integer
+        format: int64
+        minimum: 0
+      stock_item:
+        "$ref": "#/definitions/StockItem"
+    type: object
+  GetAllStockItemListResponse:
+    properties:
+      stock_items:
+        "$ref": "#/definitions/StockItemList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  StockItemListResponse:
+    properties:
+      stock_items:
+        "$ref": "#/definitions/StockItemList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  GetAllStockItemList:
+    items:
+      "$ref": "#/definitions/GetAllStockItem"
+    type: array
+  StockItemList:
+    items:
+      "$ref": "#/definitions/StockItem"
+    type: array
+  GetAllStockItem:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      count_on_hand:
+        type: string
+      backorderable:
+        type: boolean
+      stock_location_id:
+        type: integer
+        format: int64
+        minimum: 0
+      variant_id:
+        type: integer
+        format: int64
+        minimum: 0
+      variant:
+        "$ref": "#/definitions/GetAllStockItemVariant"
+    type: object
+  NewStockItem:
+    properties:
+      count_on_hand:
+        type: string
+      backorderable:
+        type: boolean
+      stock_location_id:
+        type: integer
+        format: int64
+        minimum: 0
+      variant_id:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  StockItem:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      count_on_hand:
+        type: string
+      backorderable:
+        type: boolean
+      stock_location_id:
+        type: integer
+        format: int64
+        minimum: 0
+      variant_id:
+        type: integer
+        format: int64
+        minimum: 0
+      variant:
+        "$ref": "#/definitions/StockItemVariant"
+    type: object
+  GetAllStockItemVariant:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: string
+      width:
+        type: string
+      depth:
+        type: string
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      display_price:
+        type: string
+      option_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: boolean
+      total_on_hand:
+        type: integer
+        format: int64
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  StockItemVariant:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: string
+      width:
+        type: string
+      depth:
+        type: string
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      option_values:
+        "$ref": "#/definitions/OptionValueList"
+      images:
+        "$ref": "#/definitions/ImageList"
+      display_price:
+        type: string
+      option_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: boolean
+      total_on_hand:
+        type: integer
+        format: int64
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  OptionValueAttributeListResponse:
+    properties:
+      attributes:
+        "$ref": "#/definitions/OptionValueAttrbuteList"
+      required_attributes:
+        "$ref": "#/definitions/OptionValueAttrbuteList"
+    type: object
+  OptionValueAttrbuteList:
+    items:
+      type: string
+    type: array
+  OptionTypeAttributeListResponse:
+    properties:
+      attributes:
+        "$ref": "#/definitions/OptionTypeAttributeList"
+      required_attributes:
+        "$ref": "#/definitions/OptionTypeAttributeList"
+    type: object
+  OptionTypeAttributeList:
+    items:
+      type: string
+    type: array
+  GetAllOrdersOrderListResponse:
+    properties:
+      orders:
+        "$ref": "#/definitions/GetAllOrdersOrderList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  OrderListResponse:
+    properties:
+      orders:
+        "$ref": "#/definitions/OrderList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  GetAllOrdersOrderList:
+    items:
+      "$ref": "#/definitions/GetAllOrdersOrder"
+    type: array
+  OrderList:
+    items:
+      "$ref": "#/definitions/Order"
+    type: array
+  GetAllShipmentsOrder:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      number:
+        type: string
+      item_total:
+        type: string
+      ship_total:
+        type: string
+      state:
+        type: string
+      adjustment_total:
+        type: string
+      user_id:
+        type: integer
+        format: int64
+        minimum: 0
+      created_at:
+        type: string
+        format: datetime
+      updated_at:
+        type: string
+        format: datetime
+      completed_at:
+        type: string
+        format: datetime
+      payment_total:
+        type: string
+      shipment_state:
+        type: string
+      payment_state:
+        type: string
+      email:
+        type: string
+      special_instructions:
+        type: string
+      channel:
+        type: string
+      included_tax_total:
+        type: string
+      additional_tax_total:
+        type: string
+      display_included_tax_total:
+        type: string
+      display_additional_tax_total:
+        type: string
+      tax_total:
+        type: string
+      currency:
+        type: string
+      considered_risky:
+        type: boolean
+      canceler_id:
+        type: integer
+        format: int64
+        minimum: 0
+      display_item_total:
+        type: string
+      total_quantity:
+        type: integer
+        format: int64
+        minimum: 0
+      display_total:
+        type: string
+      display_ship_total:
+        type: string
+      display_tax_total:
+        type: string
+      display_adjustment_total:
+        type: string
+      token:
+        type: string
+    type: object
+  GetAllOrdersOrder:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      number:
+        type: string
+      item_total:
+        type: string
+      ship_total:
+        type: string
+      state:
+        type: string
+      adjustment_total:
+        type: string
+      user_id:
+        type: integer
+        format: int64
+        minimum: 0
+      created_at:
+        type: string
+        format: datetime
+      updated_at:
+        type: string
+        format: datetime
+      completed_at:
+        type: string
+        format: datetime
+      payment_total:
+        type: string
+      shipment_state:
+        type: string
+      payment_state:
+        type: string
+      email:
+        type: string
+      special_instructions:
+        type: string
+      channel:
+        type: string
+      included_tax_total:
+        type: string
+      additional_tax_total:
+        type: string
+      display_included_tax_total:
+        type: string
+      display_additional_tax_total:
+        type: string
+      tax_total:
+        type: string
+      currency:
+        type: string
+      considered_risky:
+        type: boolean
+      canceler_id:
+        type: integer
+        format: int64
+        minimum: 0
+      display_item_total:
+        type: string
+      total_quantity:
+        type: integer
+        format: int64
+        minimum: 0
+      display_total:
+        type: string
+      display_ship_total:
+        type: string
+      display_tax_total:
+        type: string
+      display_adjustment_total:
+        type: string
+      token:
+        type: string
+    type: object
+  GetOrderByIdOrder:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      number:
+        type: string
+      item_total:
+        type: string
+      ship_total:
+        type: string
+      state:
+        type: string
+      adjustment_total:
+        type: string
+      user_id:
+        type: integer
+        format: int64
+        minimum: 0
+      created_at:
+        type: string
+        format: datetime
+      updated_at:
+        type: string
+        format: datetime
+      completed_at:
+        type: string
+        format: datetime
+      payment_total:
+        type: string
+      shipment_state:
+        type: string
+      payment_state:
+        type: string
+      email:
+        type: string
+      special_instructions:
+        type: string
+      channel:
+        type: string
+      included_tax_total:
+        type: string
+      additional_tax_total:
+        type: string
+      display_included_tax_total:
+        type: string
+      display_additional_tax_total:
+        type: string
+      tax_total:
+        type: string
+      currency:
+        type: string
+      considered_risky:
+        type: boolean
+      canceler_id:
+        type: integer
+        format: int64
+        minimum: 0
+      display_item_total:
+        type: string
+      total_quantity:
+        type: integer
+        format: int64
+        minimum: 0
+      display_total:
+        type: string
+      display_ship_total:
+        type: string
+      display_tax_total:
+        type: string
+      display_adjustment_total:
+        type: string
+      token:
+        type: string
+      bill_address:
+        "$ref": "#/definitions/Address"
+      ship_address:
+        "$ref": "#/definitions/Address"
+      shipments:
+        "$ref": "#/definitions/GetOrderByIdShipmentList"
+      line_items:
+        "$ref": "#/definitions/GetOrderByIdLineItemList"
+    type: object
+  OrderPermissions:
+    additionalProperties:
+      type: string
+    type: object
+  Order:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      number:
+        type: string
+      item_total:
+        type: string
+      ship_total:
+        type: string
+      state:
+        type: string
+      adjustment_total:
+        type: string
+      user_id:
+        type: integer
+        format: int64
+        minimum: 0
+      created_at:
+        type: string
+        format: datetime
+      updated_at:
+        type: string
+        format: datetime
+      completed_at:
+        type: string
+        format: datetime
+      payment_total:
+        type: string
+      shipment_state:
+        type: string
+      payment_state:
+        type: string
+      email:
+        type: string
+      special_instructions:
+        type: string
+      channel:
+        type: string
+      included_tax_total:
+        type: string
+      additional_tax_total:
+        type: string
+      display_included_tax_total:
+        type: string
+      display_additional_tax_total:
+        type: string
+      tax_total:
+        type: string
+      currency:
+        type: string
+      considered_risky:
+        type: boolean
+      canceler_id:
+        type: integer
+        format: int64
+        minimum: 0
+      display_item_total:
+        type: string
+      total_quantity:
+        type: integer
+        format: int64
+        minimum: 0
+      display_total:
+        type: string
+      display_ship_total:
+        type: string
+      display_tax_total:
+        type: string
+      display_adjustment_total:
+        type: string
+      token:
+        type: string
+      checkout_steps:
+        "$ref": "#/definitions/CheckoutSteps"
+      bill_address:
+        "$ref": "#/definitions/Address"
+      ship_address:
+        "$ref": "#/definitions/Address"
+      adjustments:
+        "$ref": "#/definitions/OrderAdjustmentList"
+      payments:
+        "$ref": "#/definitions/PaymentList"
+      line_items:
+        "$ref": "#/definitions/LineItemList"
+    type: object
+  ReturnAuthorizationListResponse:
+    properties:
+      return_authorizations:
+        "$ref": "#/definitions/ReturnAuthorizationList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  ReturnAuthorizationList:
+    items:
+      "$ref": "#/definitions/ReturnAuthorization"
+    type: array
+  NewReturnAuthorization:
+    properties:
+      order_id:
+        type: string
+      return_authorization:
+        "$ref": "#/definitions/ReturnAuthorization"
+  ReturnAuthorization:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      number:
+        type: string
+      state:
+        type: string
+      order_id:
+        type: integer
+        format: int64
+        minimum: 0
+      memo:
+        type: string
+      created_at:
+        type: string
+        format: datetime
+      updated_at:
+        type: string
+        format: datetime
+  CheckoutSteps:
+    items:
+      type: string
+    type: array
+  OrderAdjustmentList:
+    type: object
+  PaymentListResponse:
+    properties:
+      payments:
+        "$ref": "#/definitions/PaymentList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  PaymentList:
+    items:
+      "$ref": "#/definitions/Payment"
+    type: array
+  Payment:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      source_type:
+        type: string
+      source_id:
+        type: integer
+        format: int64
+        minimum: 0
+      amount:
+        type: string
+      display_amount:
+        type: string
+      payment_method_id:
+        type: integer
+        format: int64
+        minimum: 0
+      state:
+        type: string
+      avs_response:
+        type: string
+      created_at:
+        type: string
+        format: datetime
+      updated_at:
+        type: string
+        format: datetime
+      number:
+        type: string
+    type: object
+  PaymentAttributeListResponse:
+    properties:
+      attributes:
+        "$ref": "#/definitions/PaymentAttributeList"
+      payment_methods:
+        "$ref": "#/definitions/PaymentMethodList"
+    type: object
+  PaymentMethodList:
+    items:
+      "$ref": "#/definitions/PaymentMethod"
+    type: array
+  PaymentMethod:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      description:
+        type: string
+    type: object
+  PaymentAttributeList:
+    items:
+      type: string
+    type: array
+  GetAllShipmentListResponse:
+    properties:
+      shipments:
+        "$ref": "#/definitions/GetAllShipmentsShipmentList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  ShipmentListResponse:
+    properties:
+      shipments:
+        "$ref": "#/definitions/ShipmentList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  GetAllShipmentsShipmentList:
+    items:
+      "$ref": "#/definitions/GetAllShipmentsShipment"
+    type: array
+  ShipmentList:
+    items:
+      "$ref": "#/definitions/Shipment"
+    type: array
+  GetOrderByIdShipmentList:
+    items:
+      "$ref": "#/definitions/GetOrderByIdShipment"
+    type: array
+  GetOrderByIdShipment:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      tracking:
+        type: string
+      number:
+        type: string
+      cost:
+        type: string
+      shipped_at:
+        type: string
+        format: datetime
+      state:
+        type: string
+      selected_shipping_rate:
+        "$ref": "#/definitions/ShippingRate"
+    type: object
+  GetAllShipmentsShipment:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      tracking:
+        type: string
+      number:
+        type: string
+      cost:
+        type: string
+      shipped_at:
+        type: string
+        format: datetime
+      state:
+        type: string
+      selected_shipping_rate:
+        "$ref": "#/definitions/ShippingRate"
+      order:
+        "$ref": "#/definitions/GetAllShipmentsOrder"
+    type: object
+  Shipment:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      tracking:
+        type: string
+      number:
+        type: string
+      cost:
+        type: string
+      shipped_at:
+        type: string
+        format: datetime
+      state:
+        type: string
+      shipping_rates:
+        "$ref": "#/definitions/ShippingRate"
+      selected_shipping_rate:
+        "$ref": "#/definitions/ShippingRate"
+      inventory_units:
+        "$ref": "#/definitions/InventoryUnitList"
+      order:
+        "$ref": "#/definitions/Order"
+    type: object
+  ShipmentVariant:
+    properties:
+      order_id:
+        type: integer
+        format: int64
+        minimum: 0
+      stock_location_id:
+        type: integer
+        format: int64
+        minimum: 0
+      variant_id:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  NewShipmentSchema:
+    properties:
+      order_id:
+        type: integer
+        format: int64
+        minimum: 0
+      stock_location_id:
+        type: integer
+        format: int64
+        minimum: 0
+      variant_id:
+        type: integer
+        format: int64
+        minimum: 0
+  NewShipment:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      tracking:
+        type: string
+      number:
+        type: string
+      cost:
+        type: string
+      shipped_at:
+        type: string
+        format: datetime
+      state:
+        type: string
+      shipping_rates:
+        "$ref": "#/definitions/ShippingRateList"
+      selected_shipping_rate:
+        "$ref": "#/definitions/ShippingRateList"
+      shipping_methods:
+        "$ref": "#/definitions/NewShipmentShippingMethodList"
+      manifest:
+        "$ref": "#/definitions/NewShipmentManifest"
+      order_id:
+        type: integer
+        format: int64
+        minimum: 0
+      stock_location_name:
+        type: string
+    type: object
+  NewShipmentManifestList:
+    items:
+      "$ref": "#/definitions/NewShipmentManifest"
+    type: array
+  NewShipmentManifest:
+    properties:
+      variant:
+        "$ref": "#/definitions/NewShipmentManifestProductVariant"
+      quantity:
+        type: integer
+        format: int64
+        minimum: 0
+      states:
+        "$ref": "#/definitions/States"
+    type: object
+  States:
+    type: object
+    additionalProperties:
+      type: string
+  ShippingRateList:
+    items:
+      "$ref": "#/definitions/ShippingRate"
+    type: array
+  ShippingRate:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      selected:
+        type: boolean
+      shipping_method_id:
+        type: integer
+        format: int64
+        minimum: 0
+      shipping_method_code:
+        type: string
+      display_cost:
+        type: string
+    type: object
+  NewShipmentShippingMethodList:
+    items:
+      "$ref": "#/definitions/NewShipmentShippingMethod"
+    type: array
+  ShippingMethodList:
+    items:
+      "$ref": "#/definitions/ShippingMethod"
+    type: array
+  NewShipmentShippingMethod:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      code:
+        type: string
+      name:
+        type: string
+  ShippingMethod:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      code:
+        type: string
+      name:
+        type: string
+      zones:
+        "$ref": "#/definitions/ZoneList"
+      shipping_categories:
+        "$ref": "#/definitions/ShippingCategoryList"
+    type: object
+  ShippingCategoryList:
+    items:
+      "$ref": "#/definitions/ShippingCategory"
+    type: array
+  ShippingCategory:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+    type: object
+  InventoryUnitListResponse:
+    properties:
+      inventory_units:
+        "$ref": "#/definitions/InventoryUnitList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  InventoryUnitList:
+    items:
+      "$ref": "#/definitions/InventoryUnit"
+    type: array
+  InventoryUnit:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      state:
+        type: string
+      variant_id:
+        type: integer
+        format: int64
+        minimum: 0
+      shipment_id:
+        type: integer
+        format: int64
+        minimum: 0
+      variant:
+        "$ref": "#/definitions/ProductVariant"
+      line_item:
+        "$ref": "#/definitions/LineItem"
+    type: object
+  GetAllZonesZoneListResponse:
+    properties:
+      zones:
+        "$ref": "#/definitions/GetAllZonesZoneList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  ZoneListResponse:
+    properties:
+      zones:
+        "$ref": "#/definitions/ZoneList"
+      count:
+        type: integer
+        format: int64
+        minimum: 0
+      current_page:
+        type: integer
+        format: int64
+        minimum: 0
+      pages:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  GetAllZonesZoneList:
+    items:
+      "$ref": "#/definitions/GetAllZonesZone"
+    type: array
+  ZoneList:
+    items:
+      "$ref": "#/definitions/Zone"
+    type: array
+  GetAllZonesZone:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      description:
+        type: string
+    type: object
+  Zone:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      description:
+        type: string
+      zone_members:
+        "$ref": "#/definitions/ZoneMemberList"
+    type: object
+  ZoneMemberList:
+    items:
+      "$ref": "#/definitions/ZoneMember"
+    type: array
+  ZoneMember:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      zoneable_type:
+        type: string
+      zoneable_id:
+        type: integer
+        format: int64
+        minimum: 0
+    type: object
+  IDList:
+    items:
+      type: integer
+      format: int64
+      minimum: 0
+    type: array
+  GetOrderByIdLineItemList:
+    items:
+      "$ref": "#/definitions/GetOrderByIdLineItem"
+    type: array
+  GetOrderByIdLineItem:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      quantity:
+        type: integer
+      price:
+        type: string
+      variant_id:
+        type: integer
+      variant:
+        "$ref": "#/definitions/ProductIdVariant"
+      adjustments:
+        "$ref": "#/definitions/OrderAdjustments"
+      single_display_amount:
+        type: string
+      display_total:
+        type: string
+      total:
+        type: string
+  OrderAdjustments:
+    items:
+      "$ref": "#/definitions/OrderAdjustment"
+    type: array
+  OrderAdjustment:
+    type: object
+  LineItemListResponse:
+    properties:
+      line_items:
+        "$ref": "#/definitions/LineItemList"
+    type: object
+  LineItemList:
+    items:
+      "$ref": "#/definitions/LineItem"
+    type: array
+  LineItem:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      quantity:
+        type: integer
+      price:
+        type: string
+      variant_id:
+        type: integer
+      variant:
+        "$ref": "#/definitions/ProductIdVariant"
+      adjustments:
+        "$ref": "#/definitions/OrderAdjustments"
+      single_display_amount:
+        type: string
+      display_total:
+        type: string
+      total:
+        type: string
+    type: object
+  LineItemVariant:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: string
+      width:
+        type: string
+      depth:
+        type: string
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      description:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      option_values:
+        "$ref": "#/definitions/LineItemOptionValuesList"
+      images:
+        "$ref": "#/definitions/LineItemImageList"
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: boolean
+      total_on_hand:
+        type: integer
+        format: int64
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  LineItemVariantOrderId:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      sku:
+        type: string
+      price:
+        type: string
+      weight:
+        type: string
+      height:
+        type: string
+      width:
+        type: string
+      depth:
+        type: string
+      is_master:
+        type: boolean
+      slug:
+        type: string
+      track_inventory:
+        type: boolean
+      cost_price:
+        type: string
+      display_price:
+        type: string
+      options_text:
+        type: string
+      in_stock:
+        type: boolean
+      is_backorderable:
+        type: boolean
+      is_orderable:
+        type: boolean
+      total_on_hand:
+        type: integer
+        format: int64
+        minimum: 0
+      is_destroyed:
+        type: boolean
+    type: object
+  LineItemOptionValuesList:
+    items:
+      "$ref": "#/definitions/LineItemOptionValue"
+    type: array
+  LineItemOptionValue:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      name:
+        type: string
+      presentation:
+        type: string
+      option_type_name:
+        type: string
+      option_type_id:
+        type: integer
+        format: int64
+        minimum: 0
+      option_type_presentation:
+        type: string
+    type: object
+  LineItemImageList:
+    items:
+      "$ref": "#/definitions/LineItemImage"
+    type: array
+  LineItemImage:
+    properties:
+      id:
+        type: integer
+        format: int64
+        minimum: 0
+      position:
+        type: integer
+        format: int64
+        minimum: 0
+      type:
+        type: string
+      attachment_updated_at:
+        type: string
+        format: datetime
+      attachment_width:
+        type: integer
+        format: int64
+        minimum: 0
+      attachment_height:
+        type: integer
+        format: int64
+        minimum: 0
+      alt:
+        type: string
+      viewable_type:
+        type: string
+      viewable_id:
+        type: integer
+        format: int64
+        minimum: 0
+      mini_url:
+        type: string
+      small_url:
+        type: string
+      product_url:
+        type: string
+      large_url:
+        type: string
+    type: object
